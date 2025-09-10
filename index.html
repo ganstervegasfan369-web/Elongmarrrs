@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Elongma + Doge vs Bear</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{margin:0;background:#0a0a12;color:#fff;font-family:sans-serif;text-align:center}
+    canvas{border:3px solid gold;border-radius:12px;margin-top:10px}
+    #score{font-size:20px;margin:10px}
+  </style>
+</head>
+<body>
+  <h2>Elongma 🚀 + Doge 🐶 vs Bears 🐻</h2>
+  <p>Tap / Click / Space to shoot!</p>
+  <canvas id="gameCanvas" width="360" height="480"></canvas>
+  <div id="score">Score: 0</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+let score = 0;
+
+// player
+const player = { x:40, y:360, w:60, h:60 };
+
+// arrays
+let rockets = [];
+let bears = [];
+
+// shoot rocket
+function shoot(){
+  rockets.push({x:player.x+player.w, y:player.y+player.h/2-4, w:10, h:8});
+}
+
+// input
+canvas.addEventListener("click", shoot);
+document.addEventListener("keydown", e => { if(e.code==="Space") shoot(); });
+
+// spawn bears
+setInterval(()=>{ 
+  bears.push({x:canvas.width+40,y:360,w:50,h:50});
+},1500);
+
+// loop
+function loop(){
+  ctx.fillStyle="#111622";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // draw ground
+  ctx.fillStyle="#552222";
+  ctx.fillRect(0,420,canvas.width,60);
+
+  // draw player (Elongma block + Doge emoji)
+  ctx.fillStyle="gold";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
+  ctx.font="40px serif";
+  ctx.fillText("🐶",player.x-35,player.y+40);
+
+  // rockets
+  for(let i=rockets.length-1;i>=0;i--){
+    let r=rockets[i];
+    r.x+=6;
+    ctx.fillStyle="yellow";
+    ctx.fillRect(r.x,r.y, r.w,r.h);
+    if(r.x>canvas.width) rockets.splice(i,1);
+  }
+
+  // bears
+  for(let i=bears.length-1;i>=0;i--){
+    let b=bears[i];
+    b.x-=2;
+    ctx.font="40px serif";
+    ctx.fillText("🐻",b.x,b.y+40);
+
+    // collision check
+    for(let j=rockets.length-1;j>=0;j--){
+      let r=rockets[j];
+      if(r.x< b.x+b.w && r.x+r.w>b.x && r.y< b.y+b.h && r.y+r.h>b.y){
+        rockets.splice(j,1);
+        bears.splice(i,1);
+        score++;
+        break;
+      }
+    }
+
+    if(b.x+b.w<0){
+      bears.splice(i,1);
+      score = Math.max(0,score-1);
+    }
+  }
+
+  document.getElementById("score").textContent="Score: "+score;
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+  </html>
